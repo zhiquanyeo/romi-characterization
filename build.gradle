@@ -1,11 +1,7 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2021.1.1-beta-4"
+    id "edu.wpi.first.GradleRIO" version "2021.1.2"
 }
-
-wpi.maven.useDevelopment = true
-wpi.wpilibVersion = '2021.+'
-wpi.wpimathVersion = '2021.+'
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -39,7 +35,7 @@ dependencies {
 
 // Set the websocket remote host (the Romi IP address).
 sim {
-  envVar "HALSIMWS_HOST", "10.0.0.2"
+  envVar "HALSIMWS_HOST", "192.168.1.34"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

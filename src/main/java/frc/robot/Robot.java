@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
 
     // Note that the angle from the gyro must be negated because 
     // getAngle returns a clockwise positive
-    m_gyroAngleRadians = () -> (-m_gyro.getAngleZ() * Math.PI / 180.0);
+    m_gyroAngleRadians = () -> -1 * Math.toRadians(-m_gyro.getAngleZ());
 
     m_leftEncoderPosition = m_drivetrain::getLeftDistanceInch;
     m_leftEncoderRate = m_drivetrain::getLeftEncoderRate;
@@ -155,7 +155,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    m_drivetrain.arcadeDrive(m_stick.getY(Hand.kLeft), m_stick.getX(Hand.kRight));
+    m_drivetrain.arcadeDrive(-m_stick.getY(Hand.kLeft), m_stick.getX(Hand.kRight));
   }
 
   /**
