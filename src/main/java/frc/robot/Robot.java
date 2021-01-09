@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -38,11 +40,22 @@ public class Robot extends TimedRobot {
   NetworkTableEntry m_telemetryEntry = NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
   NetworkTableEntry m_rotateEntry = NetworkTableInstance.getDefault().getEntry("/robot/rotate");
   
+  String m_data = "";
+
+  int m_counter = 0;
+  double m_startTime = 0;
   double m_priorAutoSpeed = 0;
-  Number[] m_numberArray = new Number[10];
+
+  double[] m_numberArray = new double[10];
+  ArrayList<Double> m_entries = new ArrayList<>();
   
   private final RomiDrivetrain m_drivetrain = new RomiDrivetrain();
   private final RomiGyro m_gyro = new RomiGyro();
+
+  public Robot() {
+    super(0.005);
+    LiveWindow.disableAllTelemetry();
+  }
 
   /**
    * This function is run when the robot is first started up and should be
@@ -96,6 +109,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     System.out.println("Robot in autonomous mode");
     m_drivetrain.resetEncoders();
+    m_startTime = Timer.getFPGATimestamp();
+    m_counter = 0;
   }
 
   /**
@@ -103,6 +118,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    // Retrieve values to send back before telling the motors to do something
     double now = Timer.getFPGATimestamp();
 
     double leftPosition = m_leftEncoderPosition.get();
@@ -139,7 +155,11 @@ public class Robot extends TimedRobot {
     m_numberArray[8] = rightRate;
     m_numberArray[9] = m_gyroAngleRadians.get();
 
-    m_telemetryEntry.setNumberArray(m_numberArray);
+    // Add data to a string that is uploaded to NT
+    for (double num : m_numberArray) {
+      m_entries.add(num);
+    }
+    m_counter++;
   }
 
   /**
@@ -163,8 +183,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    double elapsedTime = Timer.getFPGATimestamp() - m_startTime;
     System.out.println("Robot disabled");
     m_drivetrain.tankDrive(0, 0);
+
+    // data processing step
+    m_data = m_entries.toString();
+    m_data = m_data.substring(1, m_data.length() - 1) + ", ";
+    m_telemetryEntry.setString(m_data);
+    m_entries.clear();
+    System.out.println("Collected: " + m_counter + " in " + elapsedTime + " seconds");
+    m_data = "";
   }
 
   /**
